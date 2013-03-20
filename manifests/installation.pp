@@ -1,7 +1,7 @@
 define dotnet::installation(
   $version     = $title,
   $source      = undef,
-  $destination = 'C:\packages'
+  $destination = 'C:\Support'
 ) {
 
   if $source {
@@ -14,21 +14,23 @@ define dotnet::installation(
 
   $on_disk = "${destination}\\dotnetfx.exe"
 
-  file { $on_disk:
-    ensure => file,
-    source => $location,
-    mode   => '750',
-  }
-
   if $version == '45' {
     $prettier_ver = '4.5'
   } else {
     $prettier_ver = '4.0'
   }
 
+  file { $on_disk:
+    ensure => file,
+    source => $location,
+    mode   => '750',
+  } ->
   package { "Microsoft .NET Framework ${prettier_ver}":
     ensure => present,
     source => $on_disk,
-    install_options => [ '/q', '/norestart' ],
+    #install_options => [ '/q', '/norestart' ],
+    provider => 'msi',
+    #puppet 2.7 requires a hash for install_options 
+    #install_options => { ' ' => '/quiet /norestart' }
   }
 }
