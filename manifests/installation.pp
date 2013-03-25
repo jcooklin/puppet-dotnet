@@ -41,21 +41,20 @@ define dotnet::installation(
   # 'windows' provider is puppet 3.0, which can handle msi and non-msi installs.
   
   
-  file { 'c:\\dotnet45.log' :
-     ensure       => present,
-     require      => Exec['installDotNet'],
-  }
-  
   exec { 'installDotNet' :
     #     command => "c:\\support\\Tools\\start64.exe \
     #             'cmd.exe /c \"$on_disk /q /norestart\"'", 
-     command => "cmd.exe /c $on_disk /q /norestart",
-     path    => $::path,
-     #unless => 'REG Query \"HKLM\\Software\\microsoft\\NET Framework Setup\\NDP\\v4\\Full\\" /v Release', 
-     creates => 'c:\\dotnet45.log',
-     require => [ File['tools'] ],
-     #require => [ File['tools'], Exec['deleteBlockingKey'] ],
-  }
+     command   => "cmd.exe /c $on_disk /q /norestart",
+     path      => $::path,
+     logoutput => true,
+     #unless   => 'REG Query \"HKLM\\Software\\microsoft\\NET Framework Setup\\NDP\\v4\\Full\\" /v Release', 
+     creates   => 'c:\\dotnet45.log',
+     #require  => [ File['tools'] ],
+     #require  => [ File['tools'], Exec['deleteBlockingKey'] ],
+  } ->
+  file { 'c:\\dotnet45.log' :
+     ensure      => present,
+  } 
 
 /*  package { "Microsoft .NET Framework ${prettier_ver}":
     ensure           => installed,
