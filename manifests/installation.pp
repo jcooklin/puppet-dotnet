@@ -25,10 +25,9 @@ define dotnet::installation(
   }
 
   file { $on_disk:
-    ensure  => file,
-    source  => $location,
-    mode    => '777',
-    require => File["$destination"],
+    ensure => file,
+    source => $location,
+    mode   => '750',
   }
 
   if $version == '45' {

@@ -38,7 +38,7 @@
 class dotnet(
   $version     = undef,
   $source      = undef,
-  $destination = 'C:\packages'
+  $destination = 'C:\Support'
 ) {
 
   $is_old = $::kernelmajversion =~ /^5\./
