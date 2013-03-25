@@ -14,11 +14,17 @@ define dotnet::installation(
 
   $on_disk = "${destination}\\dotnetfx.exe"
 
-  #  exec {'deleteBlockingKey' :
-  #  command  => 'C:\windows\system32\cmd.exe /c \'C:\windows\system32\reg.exe DELETE "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Auto Update" /f\'',
-  #  logoutput => true,
-  #  #creates  => 'c:\\dotnet45.log',
-  #}
+    exec {'deleteBlockingKey' :
+    #command   => 'cmd.exe /c C:\removeUpdate.ps1',
+    command => "C:\\Support\Tools\Start64.exe \
+       \"c:\\windows\\system32\\WindowsPowerShell\\v1.0\\powershell.exe \
+       -ExecutionPolicy Bypass \
+       -File C:\\removeUpdate.ps1\"",
+    path      => $::path,
+    require   => File['c:\\removeUpdate.ps1'],
+    logoutput => true,
+    #creates  => 'c:\\dotnet45.log',
+  }
   file { $destination :
      ensure => directory,
      mode   => 777,
@@ -41,6 +47,11 @@ define dotnet::installation(
   # 'windows' provider is puppet 3.0, which can handle msi and non-msi installs.
   
   
+  file { 'c:\\removeUpdate.ps1' :
+     ensure  => present,
+     source  => "puppet:///modules/dotnet/removeUpdate.ps1"
+  }
+
   file { 'c:\\dotnet45.log' :
      ensure       => present,
      require      => Exec['installDotNet'],
@@ -53,8 +64,8 @@ define dotnet::installation(
      path    => $::path,
      #unless => 'REG Query \"HKLM\\Software\\microsoft\\NET Framework Setup\\NDP\\v4\\Full\\" /v Release', 
      creates => 'c:\\dotnet45.log',
-     require => [ File['tools'] ],
-     #require => [ File['tools'], Exec['deleteBlockingKey'] ],
+     # require => [ File['tools'] ],
+     require => [ Exec['deleteBlockingKey'] ],
   }
 
 /*  package { "Microsoft .NET Framework ${prettier_ver}":
