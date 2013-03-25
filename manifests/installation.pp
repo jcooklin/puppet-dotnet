@@ -1,7 +1,7 @@
 define dotnet::installation(
   $version     = $title,
   $source      = undef,
-  $destination = 'C:\packages'
+  $destination = 'C:\\packages'
 ) {
 
   if $source {
@@ -14,10 +14,21 @@ define dotnet::installation(
 
   $on_disk = "${destination}\\dotnetfx.exe"
 
+  #  exec {'deleteBlockingKey' :
+  #  command  => 'C:\windows\system32\cmd.exe /c \'C:\windows\system32\reg.exe DELETE "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Auto Update" /f\'',
+  #  logoutput => true,
+  #  #creates  => 'c:\\dotnet45.log',
+  #}
+  file { $destination :
+     ensure => directory,
+     mode   => 777,
+  }
+
   file { $on_disk:
-    ensure => file,
-    source => $location,
-    mode   => '750',
+    ensure  => file,
+    source  => $location,
+    mode    => '777',
+    require => File["$destination"],
   }
 
   if $version == '45' {
@@ -26,9 +37,30 @@ define dotnet::installation(
     $prettier_ver = '4.0'
   }
 
-  package { "Microsoft .NET Framework ${prettier_ver}":
-    ensure => present,
-    source => $on_disk,
-    install_options => [ '/q', '/norestart' ],
+  # An exec is required for a non-msi install. The Package type will only work
+  # in  Puppet 3.0 or > because provider 'msi' was decrememted for the new
+  # 'windows' provider is puppet 3.0, which can handle msi and non-msi installs.
+  
+  
+  file { 'c:\\dotnet45.log' :
+     ensure       => present,
+     require      => Exec['installDotNet'],
   }
+  
+  exec { 'installDotNet' :
+    #     command => "c:\\support\\Tools\\start64.exe \
+    #             'cmd.exe /c \"$on_disk /q /norestart\"'", 
+     command => "cmd.exe /c $on_disk /q /norestart",
+     path    => $::path,
+     #unless => 'REG Query \"HKLM\\Software\\microsoft\\NET Framework Setup\\NDP\\v4\\Full\\" /v Release', 
+     creates => 'c:\\dotnet45.log',
+     require => [ File['tools'] ],
+     #require => [ File['tools'], Exec['deleteBlockingKey'] ],
+  }
+
+/*  package { "Microsoft .NET Framework ${prettier_ver}":
+    ensure           => installed,
+    source           => $on_disk,
+    install_options => [ '/q', '/norestart' ],
+  } */
 }
