@@ -60,8 +60,7 @@ define dotnet::installation(
      logoutput => true,
      #unless   => 'REG Query \"HKLM\\Software\\microsoft\\NET Framework Setup\\NDP\\v4\\Full\\" /v Release', 
      creates   => 'c:\\dotnet45.log',
-     #require  => [ File['tools'] ],
-     #require  => [ File['tools'], Exec['deleteBlockingKey'] ],
+     require  => [ Exec['deleteBlockingKey'] ],
   } ->
   file { 'c:\\dotnet45.log' :
      ensure      => present,
