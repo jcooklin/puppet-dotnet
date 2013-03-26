@@ -14,8 +14,7 @@ define dotnet::installation(
 
   $on_disk = "${destination}\\dotnetfx.exe"
 
-    exec {'deleteBlockingKey' :
-    #command   => 'cmd.exe /c C:\removeUpdate.ps1',
+  exec {'deleteBlockingKey' :
     command => "C:\\Support\Tools\Start64.exe \
        \"c:\\windows\\system32\\WindowsPowerShell\\v1.0\\powershell.exe \
        -ExecutionPolicy Bypass \
@@ -23,7 +22,7 @@ define dotnet::installation(
     path      => $::path,
     require   => File['c:\\removeUpdate.ps1'],
     logoutput => true,
-    #creates  => 'c:\\dotnet45.log',
+    creates  => 'c:\\dotnet45.log',
   }
 
   file { $destination :
@@ -53,8 +52,6 @@ define dotnet::installation(
   }
 
   exec { 'installDotNet' :
-    #     command => "c:\\support\\Tools\\start64.exe \
-    #             'cmd.exe /c \"$on_disk /q /norestart\"'", 
      command   => "cmd.exe /c $on_disk /q /norestart",
      path      => $::path,
      logoutput => true,
@@ -66,9 +63,4 @@ define dotnet::installation(
      ensure      => present,
   } 
 
-/*  package { "Microsoft .NET Framework ${prettier_ver}":
-    ensure           => installed,
-    source           => $on_disk,
-    install_options => [ '/q', '/norestart' ],
-  } */
 }
