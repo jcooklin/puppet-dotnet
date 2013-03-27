@@ -68,6 +68,10 @@ define dotnet::installation(
     command => "C:\\WindowsPowerShell\\system32\\shutdown.exe /r /t 1 /c \"Automated reboot by puppet after .NET 4.5 install. /a\"",
     refreshonly => true
   } ~>
+  exec { "dotnet45.remove_puppetdlock":
+    command     => 'C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe -executionpolicy remotesigned Remove-Item c:\\ProgramData\\PuppetLabs\\puppet\\var\\state\\puppetdlock',
+    refreshonly => true
+  } ~>
   exec { "dotnet45.reboot.timeout":
     command     => "c:\\windows\\system32\timeout.exe 30",
     refreshonly => true,
