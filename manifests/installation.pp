@@ -59,9 +59,18 @@ define dotnet::installation(
      creates   => 'c:\\dotnet45.log',
      returns   => ['0','194'],
      require   => [ Exec['deleteBlockingKey'] ],
+     timeout   => 500,
   } ->
   file { 'c:\\dotnet45.log' :
      ensure      => present,
-  } 
+  } ~>
+  exec { "dotnet45.reboot":
+    command => "C:\\WindowsPowerShell\\system32\\shutdown.exe /r /t 1 /c \"Automated reboot by puppet after .NET 4.5 install. /a\"",
+    refreshonly => true
+  } ~>
+  exec { "dotnet45.reboot.timeout":
+    command     => "c:\\windows\\system32\timeout.exe 30",
+    refreshonly => true,
+  }
 
 }
